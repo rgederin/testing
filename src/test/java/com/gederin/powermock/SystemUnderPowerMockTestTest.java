@@ -9,6 +9,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,10 +21,13 @@ import static org.mockito.Mockito.*;
  * Created by rgederin on 9/12/2016.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(UtilityClass.class)
+@PrepareForTest({UtilityClass.class, SystemUnderPowerMockTest.class})
 public class SystemUnderPowerMockTestTest {
     @Mock
     private Dependency dependency;
+
+    @Mock
+    private ArrayList mockList;
 
     @InjectMocks
     private SystemUnderPowerMockTest systemUnderPowerMockTest;
@@ -46,11 +50,19 @@ public class SystemUnderPowerMockTestTest {
 
 
     @Test
-    public void PrivateMethodUnderTest() throws Exception {
+    public void testPrivateMethodUnderTest() throws Exception {
         List<Integer> stats = Arrays.asList(1, 2, 3);
         when(dependency.retrieveAllStats()).thenReturn(stats);
 
         long result = Whitebox.invokeMethod(systemUnderPowerMockTest, "privateMethodUnderTest");
         assertEquals(6, result);
+    }
+
+    @Test
+    public void testConstructorMock() throws Exception {
+        when(mockList.size()).thenReturn(5);
+        PowerMockito.whenNew(ArrayList.class).withAnyArguments().thenReturn(mockList);
+        int size = systemUnderPowerMockTest.methodUsingAnArrayListConstructor();
+        assertEquals(5, size);
     }
 }
